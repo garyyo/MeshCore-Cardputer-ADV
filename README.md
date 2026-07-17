@@ -1,5 +1,7 @@
 # 🔥 MeshCore-Cardputer-ADV 🔥
 
+> This is a fork of the original that adds minimal sd card support, rest of readme left unchanged
+
 [![Buy Me a Coffee](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=☕&slug=Stachu&button_colour=ff8800&font_colour=000000&font_family=Lato&outline_colour=000000&coffee_colour=FFDD00)](https://buymeacoffee.com/Stachu)
 
 ## 🌐 Quick Flash via Web Flasher (Recommended)
