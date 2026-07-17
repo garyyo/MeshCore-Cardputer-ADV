@@ -4,10 +4,18 @@
 #include <SD.h>
 #include <SPIFFS.h>
 
-#define SD_SPI_SCK_PIN  40
-#define SD_SPI_MISO_PIN 39
-#define SD_SPI_MOSI_PIN 14
-#define SD_SPI_CS_PIN   12
+#ifndef P_SD_SCK
+#define P_SD_SCK 40
+#endif
+#ifndef P_SD_MISO
+#define P_SD_MISO 39
+#endif
+#ifndef P_SD_MOSI
+#define P_SD_MOSI 14
+#endif
+#ifndef P_SD_CS
+#define P_SD_CS 12
+#endif
 
 #include "MyMesh.h"
 
@@ -171,8 +179,8 @@ void setup() {
 #if defined(ESP32)
   Serial.println("Initializing SD card...");
   static SPIClass sd_spi(HSPI);
-  sd_spi.begin(SD_SPI_SCK_PIN, SD_SPI_MISO_PIN, SD_SPI_MOSI_PIN, SD_SPI_CS_PIN);
-  if (!SD.begin(SD_SPI_CS_PIN, sd_spi)) {
+  sd_spi.begin(P_SD_SCK, P_SD_MISO, P_SD_MOSI, P_SD_CS);
+  if (!SD.begin(P_SD_CS, sd_spi)) {
     Serial.println("ERROR: SD Card initialization FAILED!");
     Serial.println("Check SD card is inserted and detected");
 
