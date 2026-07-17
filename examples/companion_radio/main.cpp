@@ -30,8 +30,15 @@ static uint32_t _atoi(const char* sp) {
   #include <LittleFS.h>
   DataStore store(LittleFS, rtc_clock);
 #elif defined(ESP32)
-  #include <SPIFFS.h>
-  DataStore store(SPIFFS, rtc_clock);
+  #include <SPI.h>
+  #include <SD.h>
+
+  #define SD_SPI_SCK_PIN  40
+  #define SD_SPI_MISO_PIN 39
+  #define SD_SPI_MOSI_PIN 14
+  #define SD_SPI_CS_PIN   12
+
+  DataStore store(SD, rtc_clock);
 #endif
 
 #ifdef ESP32
@@ -202,7 +209,25 @@ void setup() {
   #endif
     the_mesh.startInterface(serial_interface);
 #elif defined(ESP32)
-  SPIFFS.begin(true);
+  static SPIClass sd_spi(HSPI);
+  sd_spi.begin(SD_SPI_SCK_PIN, SD_SPI_MISO_PIN, SD_SPI_MOSI_PIN, SD_SPI_CS_PIN);
+  if (!SD.begin(SD_SPI_CS_PIN, sd_spi)) {
+    Serial.println("ERROR: SD Card initialization FAILED!");
+    Serial.println("Check SD card is inserted and detected");
+
+    #ifdef DISPLAY_CLASS
+      display.startFrame();
+      display.setCursor(0, 40);
+      display.setColor(DisplayDriver::LIGHT);
+      display.print("SD CARD INIT FAIL!");
+      display.endFrame();
+    #endif
+
+    halt();
+  }
+
+  Serial.print("SD Card initialized successfully! Type=");
+  Serial.println(SD.cardType());
   store.begin();
   the_mesh.begin(
     #ifdef DISPLAY_CLASS

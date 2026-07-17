@@ -1,5 +1,13 @@
 #include <Arduino.h>
 #include <Mesh.h>
+#include <SPI.h>
+#include <SD.h>
+#include <SPIFFS.h>
+
+#define SD_SPI_SCK_PIN  40
+#define SD_SPI_MISO_PIN 39
+#define SD_SPI_MOSI_PIN 14
+#define SD_SPI_CS_PIN   12
 
 #include "MyMesh.h"
 
@@ -161,9 +169,32 @@ void setup() {
 
   FILESYSTEM* fs;
 #if defined(ESP32)
-  SPIFFS.begin(true);
-  fs = &SPIFFS;
-  IdentityStore store(SPIFFS, "/identity");
+  Serial.println("Initializing SD card...");
+  static SPIClass sd_spi(HSPI);
+  sd_spi.begin(SD_SPI_SCK_PIN, SD_SPI_MISO_PIN, SD_SPI_MOSI_PIN, SD_SPI_CS_PIN);
+  if (!SD.begin(SD_SPI_CS_PIN, sd_spi)) {
+    Serial.println("ERROR: SD Card initialization FAILED!");
+    Serial.println("Check SD card is inserted and detected");
+
+    #ifdef DISPLAY_CLASS
+      display.startFrame();
+      display.setCursor(0, 40);
+      display.setColor(DisplayDriver::LIGHT);
+      display.print("SD CARD INIT FAIL!");
+      display.endFrame();
+    #endif
+
+    // Fall back to SPIFFS if SD card fails
+    Serial.println("Falling back to internal storage (SPIFFS)...");
+    SPIFFS.begin(true);
+    fs = &SPIFFS;
+  } else {
+    Serial.print("SD Card initialized successfully! Type=");
+    Serial.println(SD.cardType());
+    fs = &SD;
+  }
+  
+  IdentityStore store(*fs, "/identity");
 #else
   #error "need to define filesystem"
 #endif
